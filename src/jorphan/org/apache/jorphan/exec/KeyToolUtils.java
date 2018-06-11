@@ -84,9 +84,9 @@ public class KeyToolUtils {
 
         String keytoolPath; // work field
         if (keytoolDir != null) {
-            keytoolPath = new File(new File(keytoolDir),KEYTOOL).getPath();
-        if (!checkKeytool(keytoolPath)) {
-                log.error("Cannot find keytool using property " + KEYTOOL_DIRECTORY + "="+keytoolDir);
+            keytoolPath = new File(new File(keytoolDir), KEYTOOL).getPath();
+            if (!checkKeytool(keytoolPath)) {
+                log.error("Cannot find keytool using property {}={}", KEYTOOL_DIRECTORY, keytoolDir);
                 keytoolPath = null; // don't try anything else if the property is provided
             }
         } else {
@@ -94,7 +94,7 @@ public class KeyToolUtils {
             if (!checkKeytool(keytoolPath)) { // Not found on PATH, check Java Home
                 File javaHome = SystemUtils.getJavaHome();
                 if (javaHome != null) {
-                    keytoolPath = new File(new File(javaHome,"bin"),KEYTOOL).getPath(); // $NON-NLS-1$
+                    keytoolPath = new File(new File(javaHome, "bin"), KEYTOOL).getPath(); // $NON-NLS-1$
                     if (!checkKeytool(keytoolPath)) {
                         keytoolPath = null;
                     }
@@ -104,9 +104,9 @@ public class KeyToolUtils {
             }
         }
         if (keytoolPath == null) {
-            log.error("Unable to find keytool application. Check PATH or define system property " + KEYTOOL_DIRECTORY);
+            log.error("Unable to find keytool application. Check PATH or define system property {}", KEYTOOL_DIRECTORY);
         } else {
-            log.info("keytool found at '" + keytoolPath + "'");
+            log.info("keytool found at '{}'", keytoolPath);
         }
         KEYTOOL_PATH = keytoolPath;
     }
@@ -281,18 +281,19 @@ public class KeyToolUtils {
     private static void generateSignedCert(File keystore, String password,
             int validity, String alias, String subject) throws IOException {
         String dname = "cn=" + subject + ", o=JMeter Proxy (TEMPORARY TRUST ONLY)";
-        KeyToolUtils.genkeypair(keystore, alias, password, validity, dname, null);
+        String ext = "san=dns:" + subject;
+        KeyToolUtils.genkeypair(keystore, alias, password, validity, dname, ext);
         //rem generate cert for DOMAIN using CA and import it
 
         // get the certificate request
         ByteArrayOutputStream certReqOut = new ByteArrayOutputStream();
-        KeyToolUtils.keytool("-certreq", keystore, password, alias, null, certReqOut);
+        KeyToolUtils.keytool("-certreq", keystore, password, alias, null, certReqOut, "-ext", ext);
 
         // create the certificate
-        //rem ku:c=dig,keyE means KeyUsage:criticial=digitalSignature,keyEncipherment
+        //rem ku:c=dig,keyE means KeyUsage:critical=digitalSignature,keyEncipherment
         InputStream certReqIn = new ByteArrayInputStream(certReqOut.toByteArray());
         ByteArrayOutputStream certOut = new ByteArrayOutputStream();
-        KeyToolUtils.keytool("-gencert", keystore, password, INTERMEDIATE_CA_ALIAS, certReqIn, certOut, "-ext", "ku:c=dig,keyE");
+        KeyToolUtils.keytool("-gencert", keystore, password, INTERMEDIATE_CA_ALIAS, certReqIn, certOut, "-ext", "ku:c=dig,keyE", "-ext ", ext);
 
         // import the certificate
         InputStream certIn = new ByteArrayInputStream(certOut.toByteArray());
@@ -366,7 +367,7 @@ public class KeyToolUtils {
      * @param command
      *            the command, not null
      * @param keystore
-     *            the keystore, not nill
+     *            the keystore, not null
      * @param password
      *            the password used for keystore and key, not null
      * @param alias
@@ -403,7 +404,7 @@ public class KeyToolUtils {
     }
 
     /**
-     * @return flag whether {@link KeyToolUtils#KEYTOOL_PATH KEYTOOL_PATH} is
+     * @return flag whether KeyToolUtils#KEYTOOL_PATH is
      *         configured (is not <code>null</code>)
      */
     public static boolean haveKeytool() {
@@ -444,7 +445,8 @@ public class KeyToolUtils {
              */
             return status == 0 || status == 1; // TODO this is rather fragile
         } catch (IOException ioe) {
-            log.error("Exception checking for keytool existence, will return false", ioe);
+            log.info("Exception checking for keytool existence, will return false, try another way.");
+            log.debug("Exception is: ", ioe);
             return false;
         } catch (InterruptedException e) { // NOSONAR
             log.error("Command was interrupted\n" + nativeCommand.getOutResult(), e);

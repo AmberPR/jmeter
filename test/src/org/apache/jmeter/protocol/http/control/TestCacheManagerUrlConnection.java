@@ -51,7 +51,7 @@ public class TestCacheManagerUrlConnection extends TestCacheManagerUrlConnection
 
     @Override
     protected void checkRequestHeader(String requestHeader, String expectedValue) {
-        Map<String, List<String>> properties = ((HttpURLConnection)this.urlConnection).getRequestProperties();
+        Map<String, List<String>> properties = this.urlConnection.getRequestProperties();
         checkProperty(properties, requestHeader, expectedValue);
     }
 
@@ -59,14 +59,29 @@ public class TestCacheManagerUrlConnection extends TestCacheManagerUrlConnection
     protected void addRequestHeader(String requestHeader, String value) {
         // no-op
     }
+    
+    private org.apache.jmeter.protocol.http.control.Header[] asHeaders(Map<String, List<String>> headers) {
+        // Java Implementation returns a null header for URL
+        return headers.entrySet().stream()
+                .filter(header -> header.getKey() != null)
+                .map(header -> new Header(header.getKey(), String.join(", ", header.getValue())))
+                .toArray(Header[]::new);
+    }
 
     @Override
     protected void setRequestHeaders() {
-        this.cacheManager.setHeaders((HttpURLConnection)this.urlConnection, this.url);
+        this.cacheManager.setHeaders(
+                (HttpURLConnection)this.urlConnection, 
+                asHeaders(urlConnection.getHeaderFields()),
+                this.url);
     }
 
     private static void checkProperty(Map<String, List<String>> properties, String property, String expectedPropertyValue) {
-        assertNotNull("Properties should not be null. Expected to find within it property = " + property + " with expected value = " + expectedPropertyValue, properties);
+        assertNotNull(
+                "Properties should not be null. Expected to find within it property = "
+                        + property + " with expected value = "
+                        + expectedPropertyValue,
+                properties);
         List<String> listOfPropertyValues = properties.get(property);
         assertNotNull("No property entry found for property " + property, listOfPropertyValues);
         assertEquals("Did not find single property for property " + property, 1, listOfPropertyValues.size());

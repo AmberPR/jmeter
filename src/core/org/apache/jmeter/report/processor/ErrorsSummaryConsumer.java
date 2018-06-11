@@ -20,6 +20,7 @@ package org.apache.jmeter.report.processor;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.report.core.Sample;
+import org.apache.jmeter.report.utils.MetricUtils;
 import org.apache.jmeter.samplers.SampleSaveConfiguration;
 import org.apache.jmeter.util.JMeterUtils;
 
@@ -39,7 +40,6 @@ public class ErrorsSummaryConsumer extends AbstractSummaryConsumer<Long> {
                         SampleSaveConfiguration.ASSERTION_RESULTS_FAILURE_MESSAGE_PROP,
                         true);
             
-    static final String ASSERTION_FAILED = "Assertion failed"; //$NON-NLS-1$
     private static final Long ZERO = Long.valueOf(0);
     private long errorCount = 0L;
 
@@ -78,22 +78,31 @@ public class ErrorsSummaryConsumer extends AbstractSummaryConsumer<Long> {
      */
     @Override
     protected String getKeyFromSample(Sample sample) {
+        return getErrorKey(sample);
+    }
+
+    /**
+     * @param sample {@link Sample}
+     * @return String Error key for sample 
+     */
+    static String getErrorKey(Sample sample) {
         String responseCode = sample.getResponseCode();
         String responseMessage = sample.getResponseMessage();
         String key = responseCode + (!StringUtils.isEmpty(responseMessage) ? 
-                 "/" + StringEscapeUtils.escapeJson(responseMessage) : "");
-        if (isSuccessCode(responseCode)) {
-            key = ASSERTION_FAILED;
+                 "/" + StringEscapeUtils.escapeJson(StringEscapeUtils.escapeHtml4(responseMessage)) : "");
+        if (MetricUtils.isSuccessCode(responseCode) || 
+                (StringUtils.isEmpty(responseCode) && 
+                        !StringUtils.isEmpty(sample.getFailureMessage()))) {
+            key = MetricUtils.ASSERTION_FAILED;
             if (ASSERTION_RESULTS_FAILURE_MESSAGE) {
                 String msg = sample.getFailureMessage();
                 if (!StringUtils.isEmpty(msg)) {
-                    key = StringEscapeUtils.escapeJson(msg);
+                    key = StringEscapeUtils.escapeJson(StringEscapeUtils.escapeHtml4(msg));
                 }
             }
         }
         return key;
     }
-
     /*
      * (non-Javadoc)
      * 
@@ -122,29 +131,6 @@ public class ErrorsSummaryConsumer extends AbstractSummaryConsumer<Long> {
             }
             info.setData(Long.valueOf(data.longValue() + 1));
         }
-    }
-
-    /**
-     * Determine if the HTTP status code is successful or not i.e. in range 200
-     * to 399 inclusive
-     *
-     * @param codeAsString
-     *            status code to check
-     * @return whether in range 200-399 or not
-     * 
-     *         FIXME Duplicates HTTPSamplerBase#isSuccessCode but it's in http
-     *         protocol
-     */
-    static boolean isSuccessCode(String codeAsString) {
-        if (StringUtils.isNumeric(codeAsString)) {
-            try {
-                int code = Integer.parseInt(codeAsString);
-                return code >= 200 && code <= 399;
-            } catch (NumberFormatException ex) {
-                return false;
-            }
-        }
-        return false;
     }
 
     /*

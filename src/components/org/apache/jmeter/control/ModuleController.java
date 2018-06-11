@@ -115,7 +115,7 @@ public class ModuleController extends GenericController implements ReplaceableCo
     public List<?> getNodePath() {
         JMeterProperty prop = getProperty(NODE_PATH);
         if (!(prop instanceof NullProperty)) {
-            return (List<?>) ((CollectionProperty) prop).getObjectValue();
+            return (List<?>) prop.getObjectValue();
         }
         return null;
     }
@@ -140,7 +140,9 @@ public class ModuleController extends GenericController implements ReplaceableCo
             }
 
             if(hasReplacementOccured() && selectedNode == null) {
-                throw new JMeterStopTestException("ModuleController:"+getName()+" has no selected Controller (did you rename some element in the path to target controller?), test was shutdown as a consequence");
+                throw new JMeterStopTestException("ModuleController:"
+                        + getName()
+                        + " has no selected Controller (did you rename some element in the path to target controller?), test was shutdown as a consequence");
             }
         }
     }
@@ -148,15 +150,10 @@ public class ModuleController extends GenericController implements ReplaceableCo
     /**
      * In GUI Mode replacement occurs when test start
      * In Non GUI Mode replacement occurs before test runs
-     * @return true if replacement occured at the time method is called
+     * @return true if replacement occurred at the time method is called
      */
     private boolean hasReplacementOccured() {
-        if(GuiPackage.getInstance() != null) {
-            // GUI Mode
-            return isRunningVersion();
-        } else {
-            return true;
-        }
+        return GuiPackage.getInstance() == null || isRunningVersion();
     }
 
     private void traverse(JMeterTreeNode node, List<?> nodePath, int level) {
@@ -197,9 +194,9 @@ public class ModuleController extends GenericController implements ReplaceableCo
     }
 
     private void createSubTree(HashTree tree, JMeterTreeNode node) {
-        Enumeration<JMeterTreeNode> e = node.children();
+        Enumeration<?> e = node.children();
         while (e.hasMoreElements()) {
-            JMeterTreeNode subNode = e.nextElement();
+            JMeterTreeNode subNode = (JMeterTreeNode)e.nextElement();
             tree.add(subNode);
             createSubTree(tree.getTree(subNode), subNode);
         }
@@ -213,9 +210,9 @@ public class ModuleController extends GenericController implements ReplaceableCo
     }
 
     private static void cloneChildren(JMeterTreeNode to, JMeterTreeNode from) {
-        Enumeration<JMeterTreeNode> enumr = from.children();
+        Enumeration<?> enumr = from.children();
         while (enumr.hasMoreElements()) {
-            JMeterTreeNode child = enumr.nextElement();
+            JMeterTreeNode child = (JMeterTreeNode) enumr.nextElement();
             JMeterTreeNode childClone = (JMeterTreeNode) child.clone();
             childClone.setUserObject(((TestElement) child.getUserObject()).clone());
             to.add(childClone);

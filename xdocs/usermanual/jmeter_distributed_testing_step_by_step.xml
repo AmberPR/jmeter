@@ -17,7 +17,7 @@
 -->
 
 <!DOCTYPE document[
-<!ENTITY sect-num '26'>
+<!ENTITY sect-num '25'>
 <!ENTITY hellip   "&#x02026;" >
 ]>
 
@@ -43,6 +43,7 @@ This short tutorial explains how to use multiple systems to perform stress testi
       If the server doesn't use <code>192.xx</code> or <code>10.xx</code> IP address, there shouldn't be any problems.</li>
   <li>Make sure JMeter can access the server.</li>
   <li>Make sure you use the same version of JMeter and Java on all the systems. Mixing versions will not work correctly.</li>
+  <li>You have <a href="remote-test.html#setup_ssl">setup SSL for RMI</a> or disabled it.</li>
 </ul>
 
 <p>
@@ -145,7 +146,7 @@ There are some basic limitations for distributed testing. Here's the list of the
 <ol>
   <li>RMI cannot communicate across subnets without a proxy; therefore neither can JMeter without a proxy.</li>
   <li>Since version 2.9, JMeter sends all the test results stripping Response data to the controlling console, this allows
-      us to reduce impact on network IO. Ensure you monitor your network traffic so that this trafic does not incur contention</li>
+      us to reduce impact on network IO. Ensure you monitor your network traffic so that this traffic does not incur contention</li>
   <li>A single JMeter client running on a 2-3 GHz CPU (recent CPU) can handle 1000-2000 threads depending on the type of test.</li>
 </ol>
 

@@ -96,7 +96,7 @@ public class Calculator {
             maximum=Math.max(newValue/sampleCount, maximum);
             // For n values in an aggregate sample the average value = (val/n)
             // So need to add n * (val/n) * (val/n) = val * val / n
-            sumOfSquares += (currentVal * currentVal) / (sampleCount);
+            sumOfSquares += (currentVal * currentVal) / sampleCount;
         } else { // no point dividing by 1
             minimum=Math.min(newValue, minimum);
             maximum=Math.max(newValue, maximum);
@@ -117,7 +117,7 @@ public class Calculator {
         addSentBytes(res.getSentBytes());
         addValue(res.getTime(),res.getSampleCount());
         errors+=res.getErrorCount(); // account for multiple samples
-        if (startTime == 0){ // not yet intialised
+        if (startTime == 0){ // not yet initialised
             startTime=res.getStartTime();
         } else {
             startTime = Math.min(startTime, res.getStartTime());

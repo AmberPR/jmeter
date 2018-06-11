@@ -47,11 +47,7 @@ public abstract class AbstractProperty implements JMeterProperty {
     }
 
     protected boolean isEqualType(JMeterProperty prop) {
-        if (this.getClass().equals(prop.getClass())) {
-            return true;
-        } else {
-            return false;
-        }
+        return this.getClass().equals(prop.getClass());
     }
 
     /** {@inheritDoc} */
@@ -297,11 +293,6 @@ public abstract class AbstractProperty implements JMeterProperty {
      * @return Collection of JMeterProperty objects
      */
     protected Collection<JMeterProperty> normalizeList(Collection<?> coll) {
-        if (coll.isEmpty()) {
-            @SuppressWarnings("unchecked") // empty collection, local var is here to allow SuppressWarnings
-            Collection<JMeterProperty> okColl = (Collection<JMeterProperty>) coll;
-            return okColl;
-        }
         try {
             @SuppressWarnings("unchecked") // empty collection
             Collection<JMeterProperty> newColl = coll.getClass().newInstance();
@@ -324,15 +315,10 @@ public abstract class AbstractProperty implements JMeterProperty {
      * @return converted Map
      */
     protected Map<String, JMeterProperty> normalizeMap(Map<?,?> coll) {
-        if (coll.isEmpty()) {
-            @SuppressWarnings("unchecked")// empty collection ok to cast, local var is here to allow SuppressWarnings
-            Map<String, JMeterProperty> emptyColl = (Map<String, JMeterProperty>) coll;
-            return emptyColl;
-        }
         try {
             @SuppressWarnings("unchecked") // empty collection
             Map<String, JMeterProperty> newColl = coll.getClass().newInstance();
-            for (Map.Entry<?,?> entry : ((Map<?,?>)coll).entrySet()) {
+            for (Map.Entry<?,?> entry : coll.entrySet()) {
                 Object key = entry.getKey();
                 Object prop = entry.getValue();
                 String item=null;
@@ -369,7 +355,7 @@ public abstract class AbstractProperty implements JMeterProperty {
      * <li>TestElement =&gt; TestElementProperty with the same name</li>
      * <li>Map|Collection =&gt; Map|CollectionProperty with the name = item.hashCode</li>
      * </ul>
-     * @param item object to be turned into a propery
+     * @param item object to be turned into a property
      * @return the JMeterProperty
      */
     protected static JMeterProperty makeProperty(Object item) {

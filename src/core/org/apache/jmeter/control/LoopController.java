@@ -29,15 +29,15 @@ import org.apache.jmeter.testelement.property.StringProperty;
 /**
  * Class that implements the Loop Controller, ie iterate infinitely or a configured number of times
  */
-public class LoopController extends GenericController implements Serializable {
-
+public class LoopController extends GenericController implements Serializable, IteratingController {
+    
     public static final int INFINITE_LOOP_COUNT = -1; // $NON-NLS-1$
     
     public static final String LOOPS = "LoopController.loops"; // $NON-NLS-1$
 
     private static final long serialVersionUID = 7833960784370272300L;
 
-    /*
+    /**
      * In spite of the name, this is actually used to determine if the loop controller is repeatable.
      *
      * The value is only used in nextIsNull() when the loop end condition has been detected:
@@ -53,8 +53,13 @@ public class LoopController extends GenericController implements Serializable {
 
     private transient int loopCount = 0;
 
-    // Cache loop value, see Bug 54467
+    /**
+     * Cached loop value 
+     * see Bug 54467
+     */
     private transient Integer nbLoops;
+
+    private boolean breakLoop;
 
     public LoopController() {
         setContinueForeverPrivate(true);
@@ -114,22 +119,28 @@ public class LoopController extends GenericController implements Serializable {
      */
     @Override
     public Sampler next() {
-        if(endOfLoop()) {
-            if (!getContinueForever()) {
-                setDone(true);
+        try {
+            if(endOfLoop()) {
+                if (!getContinueForever()) {
+                    setDone(true);
+                }
+                resetBreakLoop();
+                return null;
             }
-            return null;
+            return super.next();
+        } finally {
+            updateIterationIndex(getName(), loopCount);
         }
-        return super.next();
     }
-
+    
     private boolean endOfLoop() {
         final int loops = getLoops();
-        return (loops > INFINITE_LOOP_COUNT) && (loopCount >= loops);
+        return breakLoop || (loops > INFINITE_LOOP_COUNT) && (loopCount >= loops);
     }
 
     @Override
     protected void setDone(boolean done) {
+        resetBreakLoop();
         nbLoops = null;
         super.setDone(done);
     }
@@ -191,7 +202,23 @@ public class LoopController extends GenericController implements Serializable {
     /**
      * Start next iteration
      */
+    @Override
     public void startNextLoop() {
         reInitialize();
+    }
+
+    private void resetBreakLoop() {
+        if(breakLoop) {
+            breakLoop = false;
+        }
+    }
+
+    @Override
+    public void breakLoop() {
+        breakLoop = true;
+        setFirst(true);
+        resetCurrent();
+        resetLoopCount();
+        recoverRunningVersion();
     }
 }

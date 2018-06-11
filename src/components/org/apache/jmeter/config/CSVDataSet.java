@@ -28,6 +28,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.engine.event.LoopIterationEvent;
 import org.apache.jmeter.engine.event.LoopIterationListener;
 import org.apache.jmeter.engine.util.NoConfigMerge;
+import org.apache.jmeter.gui.GUIMenuSortOrder;
 import org.apache.jmeter.save.CSVSaveService;
 import org.apache.jmeter.services.FileServer;
 import org.apache.jmeter.testbeans.TestBean;
@@ -67,6 +68,7 @@ import org.slf4j.LoggerFactory;
  * threads with the same suffix.
  *
  */
+@GUIMenuSortOrder(1)
 public class CSVDataSet extends ConfigTestElement 
     implements TestBean, LoopIterationListener, NoConfigMerge {
     private static final Logger log = LoggerFactory.getLogger(CSVDataSet.class);
@@ -155,7 +157,7 @@ public class CSVDataSet extends ConfigTestElement
         if ("\\t".equals(delim)) { // $NON-NLS-1$
             delim = "\t";// Make it easier to enter a Tab // $NON-NLS-1$
         } else if (delim.isEmpty()){
-            log.warn("Empty delimiter converted to ','");
+            log.debug("Empty delimiter, will use ','");
             delim=",";
         }
         if (vars == null) {

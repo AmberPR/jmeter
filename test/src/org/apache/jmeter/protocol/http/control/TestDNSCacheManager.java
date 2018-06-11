@@ -20,6 +20,7 @@ package org.apache.jmeter.protocol.http.control;
 
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -42,6 +43,16 @@ public class TestDNSCacheManager extends JMeterTestCase {
         manager.setCustomResolver(true);
         manager.addHost("jmeter.example.org", "127.0.0.1");
         assertThat(manager.resolve("jmeter.example.org"),
+                CoreMatchers.is(CoreMatchers.equalTo(new InetAddress[] { InetAddress.getByName("127.0.0.1") })));
+    }
+
+    @Test
+    public void testWithOneAsStaticHostAndInvalidCustomResolver() throws Exception {
+        DNSCacheManager manager = new DNSCacheManager();
+        manager.setCustomResolver(true);
+        manager.addServer(INVALID_DNS_SERVER);
+        manager.addHost("localhost", "127.0.0.1");
+        assertThat(manager.resolve("localhost"),
                 CoreMatchers.is(CoreMatchers.equalTo(new InetAddress[] { InetAddress.getByName("127.0.0.1") })));
     }
 
@@ -94,6 +105,7 @@ public class TestDNSCacheManager extends JMeterTestCase {
     
     @Test
     public void testWithCustomResolverAnd1Server() throws UnknownHostException {
+        assumeTrue(!Boolean.getBoolean("skip.test_TestDNSCacheManager.testWithCustomResolverAnd1Server"));
         DNSCacheManager original = new DNSCacheManager();
         original.addServer(VALID_DNS_SERVER);
         original.setCustomResolver(true);

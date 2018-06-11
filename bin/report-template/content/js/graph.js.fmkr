@@ -396,8 +396,7 @@ var syntheticResponseTimeDistributionInfos = {
                     content: function(label, xval, yval, flotItem){
                         return yval + " " + label;
                     }
-                },
-                colors: ["#9ACD32", "yellow", "orange", "#FF6347"]                
+                }
             };
         },
         createGraph: function() {
@@ -442,7 +441,7 @@ var activeThreadsOverTimeInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -586,7 +585,7 @@ var bytesThroughputOverTimeInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity) ,
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -594,7 +593,7 @@ var bytesThroughputOverTimeInfos = {
                     axisLabelPadding: 20,
                 },
                 yaxis: {
-                    axisLabel: "Bytes/sec",
+                    axisLabel: "Bytes / sec",
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
                     axisLabelFontFamily: 'Verdana, Arial',
@@ -663,7 +662,7 @@ var responseTimesOverTimeInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -671,7 +670,7 @@ var responseTimesOverTimeInfos = {
                     axisLabelPadding: 20,
                 },
                 yaxis: {
-                    axisLabel: "Response time in ms",
+                    axisLabel: "Average response time in ms",
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
                     axisLabelFontFamily: 'Verdana, Arial',
@@ -740,7 +739,7 @@ var latenciesOverTimeInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -748,7 +747,7 @@ var latenciesOverTimeInfos = {
                     axisLabelPadding: 20,
                 },
                 yaxis: {
-                    axisLabel: "Response latencies in ms",
+                    axisLabel: "Average response latencies in ms",
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
                     axisLabelFontFamily: 'Verdana, Arial',
@@ -817,7 +816,7 @@ var connectTimeOverTimeInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getConnectTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -895,7 +894,7 @@ var responseTimePercentilesOverTimeInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -979,7 +978,7 @@ var responseTimeVsRequestInfos = {
                 axisLabelPadding: 20,
             },
             yaxis: {
-                axisLabel: "Median Response Time (ms)",
+                axisLabel: "Median Response Time in ms",
                 axisLabelUseCanvas: true,
                 axisLabelFontSizePixels: 12,
                 axisLabelFontFamily: 'Verdana, Arial',
@@ -1053,7 +1052,7 @@ var latenciesVsRequestInfos = {
                 axisLabelPadding: 20,
             },
             yaxis: {
-                axisLabel: "Median Latency (ms)",
+                axisLabel: "Median Latency in ms",
                 axisLabelUseCanvas: true,
                 axisLabelFontSizePixels: 12,
                 axisLabelFontFamily: 'Verdana, Arial',
@@ -1115,7 +1114,7 @@ var hitsPerSecondInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -1192,7 +1191,7 @@ var codesPerSecondInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -1200,7 +1199,7 @@ var codesPerSecondInfos = {
                     axisLabelPadding: 20,
                 },
                 yaxis: {
-                    axisLabel: "Number of responses/sec",
+                    axisLabel: "Number of responses / sec",
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
                     axisLabelFontFamily: 'Verdana, Arial',
@@ -1269,7 +1268,7 @@ var transactionsPerSecondInfos = {
                 },
                 xaxis: {
                     mode: "time",
-                    timeformat: "%H:%M:%S",
+                    timeformat: getTimeFormat(this.data.result.granularity),
                     axisLabel: getElapsedTimeLabel(this.data.result.granularity),
                     axisLabelUseCanvas: true,
                     axisLabelFontSizePixels: 12,
@@ -1332,6 +1331,84 @@ function refreshTransactionsPerSecond(fixTimestamps) {
     }
 };
 
+var totalTPSInfos = {
+        data: ${totalTPS!"{}"},
+        getOptions: function(){
+            return {
+                series: {
+                    lines: {
+                        show: true
+                    },
+                    points: {
+                        show: true
+                    }
+                },
+                xaxis: {
+                    mode: "time",
+                    timeformat: getTimeFormat(this.data.result.granularity),
+                    axisLabel: getElapsedTimeLabel(this.data.result.granularity),
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 20,
+                },
+                yaxis: {
+                    axisLabel: "Number of transactions / sec",
+                    axisLabelUseCanvas: true,
+                    axisLabelFontSizePixels: 12,
+                    axisLabelFontFamily: 'Verdana, Arial',
+                    axisLabelPadding: 20
+                },
+                legend: {
+                    noColumns: 2,
+                    show: true,
+                    container: "#legendTotalTPS"
+                },
+                selection: {
+                    mode: 'xy'
+                },
+                grid: {
+                    hoverable: true // IMPORTANT! this is needed for tooltip to
+                                    // work
+                },
+                tooltip: true,
+                tooltipOpts: {
+                    content: "%s at %x was %y transactions / sec"
+                },
+                colors: ["#9ACD32", "#FF6347"]
+            };
+        },
+    createGraph: function () {
+        var data = this.data;
+        var dataset = prepareData(data.result.series, $("#choicesTotalTPS"));
+        var options = this.getOptions();
+        prepareOptions(options, data);
+        $.plot($("#flotTotalTPS"), dataset, options);
+        // setup overview
+        $.plot($("#overviewTotalTPS"), dataset, prepareOverviewOptions(options));
+    }
+};
+
+// Total Transactions per second
+function refreshTotalTPS(fixTimestamps) {
+    var infos = totalTPSInfos;
+    prepareSeries(infos.data);
+    if(fixTimestamps) {
+        fixTimeStamps(infos.data.result.series, ${(timeZoneOffset?c)!0});
+    }
+    if(isGraph($("#flotTotalTPS"))){
+        infos.createGraph();
+    }else{
+        var choiceContainer = $("#choicesTotalTPS");
+        createLegend(choiceContainer, infos);
+        infos.createGraph();
+        setGraphZoomable("#flotTotalTPS", "#overviewTotalTPS");
+        $('#footerTotalTPS .legendColorBox > div').each(function(i){
+            $(this).clone().prependTo(choiceContainer.find("li").eq(i));
+        });
+    }
+};
+
 // Collapse the graph matching the specified DOM element depending the collapsed
 // status
 function collapse(elem, collapsed){
@@ -1389,6 +1466,11 @@ function collapse(elem, collapsed){
                 refreshTransactionsPerSecond(true);
             }
             document.location.href="#transactionsPerSecond";
+        } else if (elem.id == "bodyTotalTPS") {
+            if (isGraph($(elem).find('.flot-chart-content')) == false) {
+                refreshTotalTPS(true);
+            }
+            document.location.href="#totalTPS";
         } else if (elem.id == "bodyResponseTimeVsRequest") {
             if (isGraph($(elem).find('.flot-chart-content')) == false) {
                 refreshResponseTimeVsRequest();
@@ -1472,6 +1554,9 @@ function toggleAll(id, checked){
     } else if ( id == "choicesTransactionsPerSecond"){
         choiceContainer = $("#choicesTransactionsPerSecond");
         refreshTransactionsPerSecond(false);
+    } else if ( id == "choicesTotalTPS"){
+        choiceContainer = $("#choicesTotalTPS");
+        refreshTotalTPS(false);
     } else if ( id == "choicesResponseTimeVsRequest"){
         choiceContainer = $("#choicesResponseTimeVsRequest");
         refreshResponseTimeVsRequest();

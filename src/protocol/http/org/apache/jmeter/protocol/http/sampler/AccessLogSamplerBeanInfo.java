@@ -31,9 +31,9 @@ import org.apache.jmeter.protocol.http.util.accesslog.LogParser;
 import org.apache.jmeter.testbeans.BeanInfoSupport;
 import org.apache.jmeter.testbeans.gui.FileEditor;
 import org.apache.jmeter.util.JMeterUtils;
-import org.slf4j.LoggerFactory;
 import org.apache.jorphan.reflect.ClassFinder;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AccessLogSamplerBeanInfo extends BeanInfoSupport {
     private static final Logger log = LoggerFactory.getLogger(AccessLogSamplerBeanInfo.class);
@@ -98,7 +98,7 @@ public class AccessLogSamplerBeanInfo extends BeanInfoSupport {
             log.warn("couldn't find classes and set up properties", e);
             throw new RuntimeException("Could not find classes with class finder", e);
         }
-        log.debug("Got to end of access log samper bean info init");
+        log.debug("Got to end of access log sampler bean info init");
     }
 
 }

@@ -20,11 +20,12 @@ package org.apache.jmeter.protocol.http.control;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,8 +137,7 @@ public class HeaderManager extends ConfigTestElement implements Serializable, Re
             throw new IOException("The file you specified cannot be read.");
         }
 
-        try ( FileReader fr = new FileReader(file);
-                BufferedReader reader = new BufferedReader(fr) ) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), Charset.defaultCharset())) {
             String line;
             while ((line = reader.readLine()) != null) {
                 try {
@@ -221,6 +221,24 @@ public class HeaderManager extends ConfigTestElement implements Serializable, Re
         }
     }
 
+    /**
+     * Merge the attributes with a another HeaderManager's attributes.
+     * 
+     * @param element
+     *            The object to be merged with
+     * @param preferLocalValues Not used
+     * @return merged HeaderManager
+     * @throws IllegalArgumentException
+     *             if <code>element</code> is not an instance of
+     *             {@link HeaderManager}
+     *             
+     * @deprecated since 3.2, use {@link HeaderManager#merge(TestElement)} as this method will be removed in a future version
+     */
+    @Deprecated
+    public HeaderManager merge(TestElement element, boolean preferLocalValues) {
+        return merge(element);
+    }
+        
     /**
      * Merge the attributes with a another HeaderManager's attributes.
      * 

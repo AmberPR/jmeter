@@ -20,6 +20,7 @@ package org.apache.jmeter.control;
 
 import java.io.Serializable;
 
+import org.apache.jmeter.gui.GUIMenuSortOrder;
 import org.apache.jmeter.samplers.Sampler;
 import org.apache.jmeter.testelement.property.BooleanProperty;
 import org.apache.jmeter.testelement.property.StringProperty;
@@ -30,12 +31,14 @@ import org.slf4j.LoggerFactory;
 
 /**
  * ForeachController that iterates over a list of variables named XXXX_NN stored in {@link JMeterVariables}
- * where NN is a number starting from 1 to number of occurences.
+ * where NN is a number starting from 1 to number of occurrences.
  * This list of variable is usually set by PostProcessor (Regexp PostProcessor or {@link org.apache.jmeter.extractor.HtmlExtractor})
  * Iteration can take the full list or only a subset (configured through indexes)
  *
  */
-public class ForeachController extends GenericController implements Serializable {
+@GUIMenuSortOrder(5)
+public class ForeachController extends GenericController implements Serializable, IteratingController {
+
     private static final Logger log = LoggerFactory.getLogger(ForeachController.class);
 
     private static final long serialVersionUID = 241L;
@@ -54,11 +57,12 @@ public class ForeachController extends GenericController implements Serializable
 
     private int loopCount = 0;
 
+    private boolean breakLoop;
+
     private static final String DEFAULT_SEPARATOR = "_";// $NON-NLS-1$
 
     public ForeachController() {
     }
-    
 
     /**
      * @param startIndex Start index  of loop
@@ -75,14 +79,13 @@ public class ForeachController extends GenericController implements Serializable
         return getPropertyAsInt(START_INDEX, 0);
     }
 
-
     /**
      * @return start index of loop as String
      */
     public String getStartIndexAsString() {
         return getPropertyAsString(START_INDEX, INDEX_DEFAULT_VALUE);
     }
-    
+
     /**
      * @param endIndex End index  of loop
      */
@@ -97,14 +100,14 @@ public class ForeachController extends GenericController implements Serializable
         // Although the default is not the same as for the string value, it is only used internally
         return getPropertyAsInt(END_INDEX, Integer.MAX_VALUE);
     }
-    
+
     /**
      * @return end index of loop
      */
     public String getEndIndexAsString() {
         return getPropertyAsString(END_INDEX, INDEX_DEFAULT_VALUE);
     }
-    
+
     public void setInputVal(String inputValue) {
         setProperty(new StringProperty(INPUTVAL, inputValue));
     }
@@ -195,12 +198,17 @@ public class ForeachController extends GenericController implements Serializable
     // Prevent entry if nothing to do
     @Override
     public Sampler next() {
-        if (emptyList()) {
-            reInitialize();
-            resetLoopCount();
-            return null;
+        try {
+            if (breakLoop || emptyList()) {
+                resetBreakLoop();
+                reInitialize();
+                resetLoopCount();
+                return null;
+            }
+            return super.next();
+        } finally {
+            updateIterationIndex(getName(), loopCount);
         }
-        return super.next();
     }
 
     /**
@@ -234,9 +242,11 @@ public class ForeachController extends GenericController implements Serializable
     protected Sampler nextIsNull() throws NextIsNullException {
         reInitialize();
         // Conditions to reset the loop count
-        if (endOfArguments() // no more variables to iterate
-                ||loopCount >= getEndIndex() // we reached end index
+        if (breakLoop
+                || endOfArguments() // no more variables to iterate
+                || loopCount >= getEndIndex() // we reached end index
                 ) {
+            resetBreakLoop();
             resetLoopCount();
             return null;
         }
@@ -269,7 +279,7 @@ public class ForeachController extends GenericController implements Serializable
         incrementLoopCount();
         recoverRunningVersion();
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -279,7 +289,6 @@ public class ForeachController extends GenericController implements Serializable
         resetLoopCount();
     }
 
-
     /**
      * Reset loopCount to Start index
      * @see org.apache.jmeter.control.GenericController#initialize()
@@ -288,5 +297,25 @@ public class ForeachController extends GenericController implements Serializable
     public void initialize() {
         super.initialize();
         loopCount = getStartIndex();
+    }
+
+    @Override
+    public void startNextLoop() {
+        reInitialize();
+    }
+
+    private void resetBreakLoop() {
+        if(breakLoop) {
+            breakLoop = false;
+        }
+    }
+
+    @Override
+    public void breakLoop() {
+        breakLoop = true;
+        setFirst(true);
+        resetCurrent();
+        resetLoopCount();
+        recoverRunningVersion();
     }
 }

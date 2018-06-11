@@ -57,7 +57,6 @@ public class CounterConfig extends AbstractTestElement
     private static final boolean RESET_ON_THREAD_GROUP_ITERATION_DEFAULT = false;
 
     // This class is not cloned per thread, so this is shared
-    //@GuardedBy("this")
     private long globalCounter = Long.MIN_VALUE;
 
     // Used for per-thread/user numbers
@@ -139,7 +138,7 @@ public class CounterConfig extends AbstractTestElement
                 DecimalFormat myFormatter = new DecimalFormat(format);
                 return myFormatter.format(value);
             } catch (IllegalArgumentException ignored) {
-                log.warn("Error formating {} at format {}, using default", value, format);
+                log.warn("Error formatting {} at format {}, using default", value, format);
             }
         }
         return Long.toString(value);

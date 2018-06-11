@@ -65,6 +65,7 @@ import org.apache.jmeter.protocol.http.util.HTTPConstants;
 import org.apache.jmeter.protocol.http.util.HTTPConstantsInterface;
 import org.apache.jmeter.protocol.http.util.HTTPFileArg;
 import org.apache.jmeter.protocol.http.util.HTTPFileArgs;
+import org.apache.jmeter.report.utils.MetricUtils;
 import org.apache.jmeter.samplers.AbstractSampler;
 import org.apache.jmeter.samplers.Entry;
 import org.apache.jmeter.samplers.SampleResult;
@@ -192,7 +193,7 @@ public abstract class HTTPSamplerBase extends AbstractSampler
     public static final boolean BROWSER_COMPATIBLE_MULTIPART_MODE_DEFAULT = false; // The default setting to be used (i.e. historic)
 
     private static final int MAX_BYTES_TO_STORE_PER_REQUEST =
-            JMeterUtils.getPropDefault("httpsampler.max_bytes_to_store_per_request", 10 * 1024 *1024); // $NON-NLS-1$ // default value: 10MB
+            JMeterUtils.getPropDefault("httpsampler.max_bytes_to_store_per_request", 0); // $NON-NLS-1$ // default value: 0 don't truncate
 
     private static final int MAX_BUFFER_SIZE = 
             JMeterUtils.getPropDefault("httpsampler.max_buffer_size", 65 * 1024); // $NON-NLS-1$
@@ -408,9 +409,32 @@ public abstract class HTTPSamplerBase extends AbstractSampler
         // and the files should not be send as the post body
         HTTPFileArg[] files = getHTTPFiles();
         return HTTPConstants.POST.equals(getMethod())
-                && (getDoMultipartPost() || (files.length > 0 && !getSendFileAsPostBody()));
+                && (getDoMultipart() || (files.length > 0 && hasNoMissingFile(files) && !getSendFileAsPostBody()));
+    }
+    
+    /**
+     * Determine if we should use multipart/form-data or
+     * application/x-www-form-urlencoded for the post
+     *
+     * @return true if multipart/form-data should be used and method is POST
+     */
+    public boolean getUseMultipart() {
+        // We use multipart if we have been told so, or files are present
+        // and the files should not be send as the post body
+        HTTPFileArg[] files = getHTTPFiles();
+        return getDoMultipart() || (files.length>0 && hasNoMissingFile(files) && !getSendFileAsPostBody());
     }
 
+    private boolean hasNoMissingFile(HTTPFileArg[] files) {
+        for (HTTPFileArg httpFileArg : files) {
+            if(StringUtils.isEmpty(httpFileArg.getPath())) {
+                log.warn("File {} is invalid as no path is defined", httpFileArg);
+                return false;
+            }
+        }
+        return true;
+    }
+    
     public void setProtocol(String value) {
         setProperty(PROTOCOL, value.toLowerCase(java.util.Locale.ENGLISH));
     }
@@ -522,11 +546,29 @@ public abstract class HTTPSamplerBase extends AbstractSampler
         return getPropertyAsBoolean(USE_KEEPALIVE);
     }
 
+    /**
+     * @deprecated use {@link HTTPSamplerBase#setDoMultipartPost(boolean)}
+     * @param value flag whether multiparts should be used
+     */
+    @Deprecated
     public void setDoMultipartPost(boolean value) {
+        setDoMultipart(value);
+    }
+
+    /**
+     * @deprecated use {@link HTTPSamplerBase#getDoMultipartPost()}
+     * @return flag whether multiparts should be used
+     */
+    @Deprecated
+    public boolean getDoMultipartPost() {
+        return getDoMultipart();
+    }
+
+    public void setDoMultipart(boolean value) {
         setProperty(new BooleanProperty(DO_MULTIPART_POST, value));
     }
 
-    public boolean getDoMultipartPost() {
+    public boolean getDoMultipart() {
         return getPropertyAsBoolean(DO_MULTIPART_POST, false);
     }
 
@@ -1669,7 +1711,7 @@ public abstract class HTTPSamplerBase extends AbstractSampler
      * @return whether in range 200-399 or not
      */
     protected boolean isSuccessCode(int code) {
-        return code >= 200 && code <= 399;
+        return MetricUtils.isSuccessCode(code);
     }
 
     protected static String encodeBackSlashes(String value) {
@@ -1827,9 +1869,12 @@ public abstract class HTTPSamplerBase extends AbstractSampler
                 
                 if (md == null) {
                     if(storeInBOS) {
-                        if(totalBytes+bytesReadInBuffer<=MAX_BYTES_TO_STORE_PER_REQUEST) {
+                        if(MAX_BYTES_TO_STORE_PER_REQUEST <= 0 ||
+                                (totalBytes+bytesReadInBuffer<=MAX_BYTES_TO_STORE_PER_REQUEST) ||
+                                JMeterContextService.getContext().isRecording()) {
                             w.write(readBuffer, 0, bytesReadInBuffer);
                         } else {
+                            log.debug("Big response, truncating it to {} bytes", MAX_BYTES_TO_STORE_PER_REQUEST);
                             w.write(readBuffer, 0, (int)(MAX_BYTES_TO_STORE_PER_REQUEST-totalBytes));
                             storeInBOS = false;
                         }
@@ -2073,7 +2118,6 @@ public abstract class HTTPSamplerBase extends AbstractSampler
             // check if there is anything to replace
             int nbReplaced = ((Integer)result[1]).intValue();
             if (nbReplaced>0) {
-                totalReplaced += nbReplaced;
                 String replacedText = (String) result[0];
                 setPath(replacedText);
                 totalReplaced += nbReplaced;
@@ -2085,7 +2129,6 @@ public abstract class HTTPSamplerBase extends AbstractSampler
             // check if there is anything to replace
             int nbReplaced = ((Integer)result[1]).intValue();
             if (nbReplaced>0) {
-                totalReplaced += nbReplaced;
                 String replacedText = (String) result[0];
                 setDomain(replacedText);
                 totalReplaced += nbReplaced;

@@ -252,11 +252,11 @@ public abstract class AbstractGraphConsumer extends AbstractSampleConsumer {
 
     /**
      * Adds a value map build from specified parameters to the result map.
-     *
+     * @param result {@link MapResultData}
+     * @param group 
+     * @param series
      * @param seriesData
-     *            the seriesData
-     * @param map
-     *            the groupData map
+     * @param aggregated
      */
     private void addKeyData(MapResultData result, String group, String series,
             SeriesData seriesData, boolean aggregated) {
@@ -286,16 +286,7 @@ public abstract class AbstractGraphConsumer extends AbstractSampleConsumer {
 
         // Create series result if not found
         if (seriesResult == null) {
-            seriesResult = new MapResultData();
-            seriesResult.setResult(RESULT_SERIES_NAME,
-                    new ValueResultData(series));
-            seriesResult.setResult(RESULT_SERIES_IS_CONTROLLER,
-                    new ValueResultData(
-                            Boolean.valueOf(seriesData.isControllersSeries())));
-            seriesResult.setResult(RESULT_SERIES_IS_OVERALL,
-                    new ValueResultData(
-                            Boolean.valueOf(seriesData.isOverallSeries())));
-            seriesResult.setResult(RESULT_SERIES_DATA, new ListResultData());
+            seriesResult = createSerieResult(series, seriesData);
             seriesList.addResult(seriesResult);
         }
 
@@ -386,14 +377,26 @@ public abstract class AbstractGraphConsumer extends AbstractSampleConsumer {
     }
 
     /**
+     * @param serie String serie name
+     * @param seriesData {@link SeriesData}
+     * @return MapResultData metadata for serie
+     */
+    protected MapResultData createSerieResult(String serie, SeriesData seriesData) {
+        MapResultData seriesResult = new MapResultData();
+        seriesResult.setResult(RESULT_SERIES_NAME,
+                new ValueResultData(serie));
+        seriesResult.setResult(RESULT_SERIES_IS_CONTROLLER,
+                new ValueResultData(
+                        Boolean.valueOf(seriesData.isControllersSeries())));
+        seriesResult.setResult(RESULT_SERIES_IS_OVERALL,
+                new ValueResultData(
+                        Boolean.valueOf(seriesData.isOverallSeries())));
+        seriesResult.setResult(RESULT_SERIES_DATA, new ListResultData());
+        return seriesResult;
+    }
+
+    /**
      * Aggregate a value to the aggregator defined by the specified parameters.
-     *
-     * @param groupData
-     *            the map
-     * @param key
-     *            the key
-     * @param value
-     *            the value
      */
     private void aggregateValue(AggregatorFactory factory, SeriesData data,
             Double key, double value) {

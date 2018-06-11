@@ -18,6 +18,7 @@
 
 package org.apache.jmeter.assertions;
 
+import org.apache.jmeter.gui.GUIMenuSortOrder;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.util.BeanShellInterpreter;
 import org.apache.jmeter.util.BeanShellTestElement;
@@ -28,6 +29,7 @@ import org.slf4j.LoggerFactory;
  * An Assertion which understands BeanShell
  *
  */
+@GUIMenuSortOrder(Integer.MAX_VALUE)
 public class BeanShellAssertion extends BeanShellTestElement implements Assertion {
     private static final Logger log = LoggerFactory.getLogger(BeanShellAssertion.class);
 
@@ -109,7 +111,7 @@ public class BeanShellAssertion extends BeanShellTestElement implements Assertio
                     .toString()));
             result.setError(false);
         }
-        catch (NoClassDefFoundError ex) { // NOSONAR explicitely trap this error to make tests work better 
+        catch (NoClassDefFoundError ex) { // NOSONAR explicitly trap this error to make tests work better
             log.error("BeanShell Jar missing? " + ex.toString());
             result.setError(true);
             result.setFailureMessage("BeanShell Jar missing? " + ex.toString());

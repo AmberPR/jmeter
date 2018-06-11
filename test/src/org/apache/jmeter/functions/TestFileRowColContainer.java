@@ -23,7 +23,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.io.FileNotFoundException;
+import java.nio.file.NoSuchFileException;
 
 import org.apache.jmeter.junit.JMeterTestCase;
 import org.junit.Test;
@@ -32,22 +32,17 @@ import org.junit.Test;
  * File data container for CSV (and similar delimited) files Data is accessible
  * via row and column number
  * 
- * @version $Revision$
  */
 public class TestFileRowColContainer extends JMeterTestCase {
 
-    @Test
+    @Test(expected=NoSuchFileException.class)
     public void testNull() throws Exception {
-        try {
-            new FileRowColContainer(findTestPath("testfiles/xyzxyz"));
-            fail("Should not find the file");
-        } catch (FileNotFoundException e) {
-        }
+        new FileRowColContainer(findTestPath("testfiles/xyzxyz"));
     }
 
     @Test
     public void testrowNum() throws Exception {
-        FileRowColContainer f = new FileRowColContainer(findTestPath("testfiles/test.csv"));
+        FileRowColContainer f = new FileRowColContainer(findTestPath("testfiles/unit/TestFileRowColContainer.csv"));
         assertNotNull(f);
         assertEquals("Expected 4 lines", 4, f.getSize());
 
@@ -61,7 +56,7 @@ public class TestFileRowColContainer extends JMeterTestCase {
 
     @Test
     public void testColumns() throws Exception {
-        FileRowColContainer f = new FileRowColContainer(findTestPath("testfiles/test.csv"));
+        FileRowColContainer f = new FileRowColContainer(findTestPath("testfiles/unit/TestFileRowColContainer.csv"));
         assertNotNull(f);
         assertTrue("Not empty", f.getSize() > 0);
 
@@ -83,7 +78,7 @@ public class TestFileRowColContainer extends JMeterTestCase {
 
     @Test
     public void testColumnsComma() throws Exception {
-        FileRowColContainer f = new FileRowColContainer(findTestPath("testfiles/test.csv"), ",");
+        FileRowColContainer f = new FileRowColContainer(findTestPath("testfiles/unit/TestFileRowColContainer.csv"), ",");
         assertNotNull(f);
         assertTrue("Not empty", f.getSize() > 0);
 
